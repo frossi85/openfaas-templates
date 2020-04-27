@@ -1,16 +1,9 @@
-"use strict";
-import result from "./result";
+import responseFormatter from "./responseFormatter";
 
-const handler = async (event, context) => {
-  //const result = {
-  //  'status': 'Received input: ' + JSON.stringify(event.body)
-  //};
-
+const handler = async (event: any, context: any) => {
   return context
     .status(200)
-    .succeed(result(event.body))
+    .succeed(responseFormatter(event.body))
 };
 
-
-module.exports = handler;
-//export default handler;
+export default handler;

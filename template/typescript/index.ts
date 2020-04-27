@@ -1,11 +1,9 @@
 // Copyright (c) Alex Ellis 2017. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-"use strict";
-
-const express = require('express');
-const handler = require('./function/handler');
-const bodyParser = require('body-parser');
+import express from 'express';
+import handler from './function/handler';
+import bodyParser from 'body-parser';
 
 const app = express();
 
@@ -21,6 +19,12 @@ if (process.env.RAW_BODY === 'true') {
 app.disable('x-powered-by');
 
 class FunctionEvent {
+    body: any;
+    headers: any;
+    method: any;
+    query: any;
+    path: any;
+
     constructor(req) {
         this.body = req.body;
         this.headers = req.headers;
@@ -31,6 +35,11 @@ class FunctionEvent {
 }
 
 class FunctionContext {
+    value: number;
+    cbCalled: number;
+    headerValues: object;
+    cb: any;
+
     constructor(cb) {
         this.value = 200;
         this.cb = cb;
@@ -38,7 +47,7 @@ class FunctionContext {
         this.cbCalled = 0;
     }
 
-    status(value) {
+    status(value?) {
         if(!value) {
             return this.value;
         }
@@ -47,7 +56,7 @@ class FunctionContext {
         return this;
     }
 
-    headers(value) {
+    headers(value?) {
         if(!value) {
             return this.headerValues;
         }
@@ -70,7 +79,7 @@ class FunctionContext {
 }
 
 var middleware = async (req, res) => {
-    let cb = (err, functionResult) => {
+    let cb = (err, functionResult?) => {
         if (err) {
             console.error(err);
 
@@ -87,7 +96,7 @@ var middleware = async (req, res) => {
     let fnEvent = new FunctionEvent(req);
     let fnContext = new FunctionContext(cb);
 
-    Promise.resolve(handler(fnEvent, fnContext, cb))
+    Promise.resolve(handler(fnEvent, fnContext))
     .then(res => {
         if(!fnContext.cbCalled) {
             fnContext.succeed(res);

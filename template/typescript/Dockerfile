@@ -22,7 +22,8 @@ COPY package.json ./
 RUN npm i
 
 # Copy outer function handler
-COPY index.js ./
+COPY index.ts ./
+COPY tsconfig.json ./
 
 # COPY function node packages and install, adding this as a separate
 # entry allows caching of npm install
@@ -48,7 +49,7 @@ RUN chown app:app -R /home/app \
 
 USER app
 
-RUN ./node_modules/typescript/bin/tsc --project ./function
+RUN ./node_modules/typescript/bin/tsc --project .
 
 ENV cgi_headers="true"
 ENV fprocess="node index.js"
