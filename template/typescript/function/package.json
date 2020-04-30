@@ -5,9 +5,18 @@
   "main": "handler.js",
   "es6": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 0"
+    "test": "mocha --experimental-modules",
+    "test:local": "tsc --project . && mocha --experimental-modules"
   },
   "keywords": [],
   "author": "OpenFaaS Ltd",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@types/mocha": "^7.0.2",
+    "@types/node": "^13.13.4"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^6.2.2"
+  }
 }

@@ -38,7 +38,7 @@ RUN npm i || :
 COPY function/ ./
 
 # Run any tests that may be available
-RUN npm test
+#RUN npm test
 
 # Set correct permissions to use non root user
 WORKDIR /home/app/
@@ -49,7 +49,15 @@ RUN chown app:app -R /home/app \
 
 USER app
 
+# Compile the whole project
 RUN ./node_modules/typescript/bin/tsc --project .
+
+WORKDIR /home/app/function
+# Run any tests that may be available
+RUN npm test
+
+
+WORKDIR /home/app/
 
 ENV cgi_headers="true"
 ENV fprocess="node index.js"
