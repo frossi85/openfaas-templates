@@ -11,12 +11,16 @@ WORKDIR /root/
 
 # Turn down the verbosity to default level.
 ENV NPM_CONFIG_LOGLEVEL warn
+ENV NPM_TOKEN="mmBzSVsoKXPZ/GiNuAgst0YAZWltHkXHbJmOX6cO7bo="
 
 RUN mkdir -p /home/app
 
 # Wrapper/boot-strapper
 WORKDIR /home/app
 COPY package.json ./
+
+RUN echo $'registry=https://npm.invertifacil.com.ar\n\
+//npm.invertifacil.com.ar/:_authToken="mmBzSVsoKXPZ/GiNuAgst0YAZWltHkXHbJmOX6cO7bo="' > ~/.npmrc
 
 # This ordering means the npm installation is cached for the outer function handler.
 RUN npm i
