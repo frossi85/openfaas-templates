@@ -11,7 +11,6 @@ WORKDIR /root/
 
 # Turn down the verbosity to default level.
 ENV NPM_CONFIG_LOGLEVEL warn
-ENV NPM_TOKEN="mmBzSVsoKXPZ/GiNuAgst0YAZWltHkXHbJmOX6cO7bo="
 
 RUN mkdir -p /home/app
 
