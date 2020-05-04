@@ -5,8 +5,10 @@
   "main": "handler.js",
   "es6": true,
   "scripts": {
+    "build": "tsc --project .",
+    "clean": "tsc --build --clean",
     "test": "mocha --experimental-modules",
-    "test:local": "tsc --project . && mocha --experimental-modules"
+    "test:local": "npm run build && mocha --experimental-modules && npm run clean"
   },
   "keywords": [],
   "author": "OpenFaaS Ltd",
