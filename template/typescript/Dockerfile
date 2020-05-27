@@ -4,7 +4,8 @@ FROM node:12.13.0-alpine as ship
 COPY --from=watchdog /fwatchdog /usr/bin/fwatchdog
 RUN chmod +x /usr/bin/fwatchdog
 
-RUN apk --no-cache add curl ca-certificates \
+RUN echo "Installing system dependencies"
+RUN apk --no-cache add curl ca-certificates libpng-dev autoconf automake make g++ libtool nasm \
     && addgroup -S app && adduser -S -g app app
 
 WORKDIR /root/
