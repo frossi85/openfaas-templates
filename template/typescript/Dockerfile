@@ -4,9 +4,8 @@ FROM node:12.13.0-alpine as ship
 COPY --from=watchdog /fwatchdog /usr/bin/fwatchdog
 RUN chmod +x /usr/bin/fwatchdog
 
-RUN echo "Installing system dependencies"
-RUN apk --no-cache add curl ca-certificates libpng-dev autoconf automake make g++ libtool nasm \
-    && addgroup -S app && adduser -S -g app app
+RUN apk --no-cache add curl ca-certificates \
+	&& addgroup -S app && adduser -S -g app app
 
 WORKDIR /root/
 
@@ -35,6 +34,11 @@ COPY tsconfig.json ./
 WORKDIR /home/app/function
 
 COPY function/*.json ./
+
+RUN if grep "imagemin" ./package.json > /dev/null ; then \
+		echo "Installing image min dependencies" && apk --no-cache add libpng-dev autoconf automake make g++ libtool nasm ; \
+	fi
+
 
 RUN npm i || :
 
