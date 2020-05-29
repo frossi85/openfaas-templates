@@ -1,11 +1,11 @@
-FROM openfaas/of-watchdog:0.7.2 as watchdog
+FROM openfaas/of-watchdog:0.7.7 as watchdog
 FROM node:12.13.0-alpine as ship
 
 COPY --from=watchdog /fwatchdog /usr/bin/fwatchdog
 RUN chmod +x /usr/bin/fwatchdog
 
 RUN apk --no-cache add curl ca-certificates \
-	&& addgroup -S app && adduser -S -g app app
+ 	&& addgroup -S app && adduser -S -g app app
 
 WORKDIR /root/
 
@@ -16,6 +16,7 @@ RUN mkdir -p /home/app
 
 # Wrapper/boot-strapper
 WORKDIR /home/app
+
 COPY package.json ./
 
 RUN echo $'registry=https://npm.invertifacil.com.ar\n\
@@ -28,19 +29,56 @@ RUN npm i
 COPY index.ts ./
 COPY tsconfig.json ./
 
+
 # COPY function node packages and install, adding this as a separate
 # entry allows caching of npm install
+WORKDIR /home/app/function
+COPY function/*.json ./
+
+# Install image-processing dependencies
+RUN if grep "image-processing" ./package.json > /dev/null ; then \
+	echo "Installing image-processing dependencies" && \
+    apk --update --no-cache add \
+        build-base \
+        libpng-dev \
+        autoconf \
+        automake \
+        libtool \
+        pkgconf \
+        nasm \
+        tar ; \
+fi 
+
+# To make user executables available from any place  
+ENV PATH="/usr/local/bin:${PATH}"
+
+
+# Install package dependencies, adding this as a separate
+# entry allows caching of npm install
+RUN npm i || :
+
+# Install mozjpeg if imagemin is used
+ARG tag=v3.3.1
+WORKDIR /src/mozjpeg
+ADD https://github.com/mozilla/mozjpeg/archive/$tag.tar.gz ./
+
+RUN if grep "image-processing" /home/app/function/package.json > /dev/null ; then \
+    tar -xzf $tag.tar.gz && \
+    rm $tag.tar.gz && \
+    SRC_DIR=$(ls -t1 -d mozjpeg-* | head -n1) && \
+    cd $SRC_DIR && \
+    autoreconf -fiv && \
+    cd .. && \
+    sh $SRC_DIR/configure --enable-static --disable-shared --disable-dependency-tracking --with-jpeg8 && \
+    make install \
+         prefix=/usr/local \
+         libdir=/usr/local/lib64 ; \
+fi
 
 WORKDIR /home/app/function
 
-COPY function/*.json ./
+RUN npm rebuild
 
-RUN if grep "imagemin" ./package.json > /dev/null ; then \
-		echo "Installing image min dependencies" && apk --no-cache add libpng-dev autoconf automake make g++ libtool nasm ; \
-	fi
-
-
-RUN npm i || :
 
 # COPY function files and folders
 COPY function/ ./
@@ -52,8 +90,10 @@ COPY function/ ./
 WORKDIR /home/app/
 
 # chmod for tmp is for a buildkit issue (@alexellis)
-RUN chown app:app -R /home/app \
-    && chmod 777 /tmp
+RUN chmod +rx -R ./function \ 
+	&& chown app:app -R /home/app \
+    && chmod -R 777 /tmp \
+	&& chown app:app -R /tmp 
 
 USER app
 
@@ -79,4 +119,3 @@ ENV read_timeout="15s"
 HEALTHCHECK --interval=3s CMD [ -e /tmp/.lock ] || exit 1
 
 CMD ["fwatchdog"]
-

@@ -10,11 +10,12 @@
     "test": "mocha --experimental-modules",
     "test:local": "npm run build && mocha --experimental-modules && npm run clean"
   },
-  "keywords": [],
+  "keywords": ["image-processing"],
   "author": "OpenFaaS Ltd",
   "license": "MIT",
   "dependencies": {
-    "@inverti-facil/core": "0.0.1"
+    "@inverti-facil/core": "^0.1.2",
+    "@inverti-facil/images": "0.1.5"
   },
   "devDependencies": {
     "chai": "^4.2.0",
