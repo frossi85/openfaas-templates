@@ -7,6 +7,37 @@ RUN chmod +x /usr/bin/fwatchdog
 RUN apk --no-cache add curl ca-certificates \
  	&& addgroup -S app && adduser -S -g app app
 
+# Install image-processing dependencies
+RUN echo "Installing image-processing dependencies" && \
+    apk --update --no-cache add \
+        build-base \
+        libpng-dev \
+        autoconf \
+        automake \
+        libtool \
+        pkgconf \
+        nasm \
+        tar
+
+# To make user executables available from any place  
+ENV PATH="/usr/local/bin:${PATH}"
+
+# Install mozjpeg if imagemin is used
+ARG tag=v3.3.1
+WORKDIR /src/mozjpeg
+ADD https://github.com/mozilla/mozjpeg/archive/$tag.tar.gz ./
+
+RUN tar -xzf $tag.tar.gz && \
+    rm $tag.tar.gz && \
+    SRC_DIR=$(ls -t1 -d mozjpeg-* | head -n1) && \
+    cd $SRC_DIR && \
+    autoreconf -fiv && \
+    cd .. && \
+    sh $SRC_DIR/configure --enable-static --disable-shared --disable-dependency-tracking --with-jpeg8 && \
+    make install \
+         prefix=/usr/local \
+         libdir=/usr/local/lib64
+
 WORKDIR /root/
 
 # Turn down the verbosity to default level.
@@ -35,50 +66,12 @@ COPY tsconfig.json ./
 WORKDIR /home/app/function
 COPY function/*.json ./
 
-# Install image-processing dependencies
-RUN if grep "image-processing" ./package.json > /dev/null ; then \
-	echo "Installing image-processing dependencies" && \
-    apk --update --no-cache add \
-        build-base \
-        libpng-dev \
-        autoconf \
-        automake \
-        libtool \
-        pkgconf \
-        nasm \
-        tar ; \
-fi 
-
-# To make user executables available from any place  
-ENV PATH="/usr/local/bin:${PATH}"
-
 
 # Install package dependencies, adding this as a separate
 # entry allows caching of npm install
 RUN npm i || :
 
-# Install mozjpeg if imagemin is used
-ARG tag=v3.3.1
-WORKDIR /src/mozjpeg
-ADD https://github.com/mozilla/mozjpeg/archive/$tag.tar.gz ./
-
-RUN if grep "image-processing" /home/app/function/package.json > /dev/null ; then \
-    tar -xzf $tag.tar.gz && \
-    rm $tag.tar.gz && \
-    SRC_DIR=$(ls -t1 -d mozjpeg-* | head -n1) && \
-    cd $SRC_DIR && \
-    autoreconf -fiv && \
-    cd .. && \
-    sh $SRC_DIR/configure --enable-static --disable-shared --disable-dependency-tracking --with-jpeg8 && \
-    make install \
-         prefix=/usr/local \
-         libdir=/usr/local/lib64 ; \
-fi
-
-WORKDIR /home/app/function
-
 RUN npm rebuild
-
 
 # COPY function files and folders
 COPY function/ ./
@@ -104,6 +97,8 @@ WORKDIR /home/app/function
 # Run any tests that may be available
 RUN npm test
 
+RUN echo "Testing that cjpeg is working" && \
+    cjpeg -version
 
 WORKDIR /home/app/
 
