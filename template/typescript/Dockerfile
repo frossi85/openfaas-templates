@@ -19,6 +19,28 @@ RUN echo "Installing image-processing dependencies" && \
         nasm \
         tar
 
+# To make user executables available from any place
+ENV PATH="/usr/local/bin:${PATH}"
+
+# Install mozjpeg if imagemin is used
+ARG tag=v3.3.1
+WORKDIR /src/mozjpeg
+ADD https://github.com/mozilla/mozjpeg/archive/$tag.tar.gz ./
+
+RUN tar -xzf $tag.tar.gz && \
+    rm $tag.tar.gz && \
+    SRC_DIR=$(ls -t1 -d mozjpeg-* | head -n1) && \
+    cd $SRC_DIR && \
+    autoreconf -fiv && \
+    cd .. && \
+    sh $SRC_DIR/configure --enable-static --disable-shared --disable-dependency-tracking --with-jpeg8 && \
+    make install \
+         prefix=/usr/local \
+         libdir=/usr/local/lib64
+
+# To make user executables available from any place
+ENV PATH="/usr/local/bin:${PATH}"
+
 WORKDIR /root/
 
 # Turn down the verbosity to default level.
@@ -65,34 +87,18 @@ WORKDIR /home/app/
 
 # chmod for tmp is for a buildkit issue (@alexellis)
 RUN chmod +rx -R ./function \
-	&& chown app:app -R /home/app \
-    && chmod -R 777 /tmp \
-	&& chown app:app -R /tmp
+		&& chown app:app -R /home/app \
+   	&& chmod -R 777 /tmp \
+		&& chown app:app -R /tmp \
+		&& chmod +rx -R /usr/local \
+		&& chown app:app -R /usr/local \
+		&& chmod +rx -R /usr/local/bin \
+   	&& chown app:app -R /usr/local/bin
 
 USER app
 
 # Compile the whole project
 RUN ./node_modules/typescript/bin/tsc --project .
-
-
-# Install mozjpeg if imagemin is used
-ARG tag=v3.3.1
-WORKDIR /src/mozjpeg
-ADD https://github.com/mozilla/mozjpeg/archive/$tag.tar.gz ./
-
-RUN tar -xzf $tag.tar.gz && \
-    rm $tag.tar.gz && \
-    SRC_DIR=$(ls -t1 -d mozjpeg-* | head -n1) && \
-    cd $SRC_DIR && \
-    autoreconf -fiv && \
-    cd .. && \
-    sh $SRC_DIR/configure --enable-static --disable-shared --disable-dependency-tracking --with-jpeg8 && \
-    make install \
-         prefix=/usr/local \
-         libdir=/usr/local/lib64
-
-# To make user executables available from any place
-ENV PATH="/usr/local/bin:${PATH}"
 
 WORKDIR /home/app/function
 # Run any tests that may be available
