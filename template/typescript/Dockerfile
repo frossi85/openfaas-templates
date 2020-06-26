@@ -1,45 +1,45 @@
-FROM openfaas/of-watchdog:0.7.7 as watchdog
-FROM node:12.13.0-alpine as ship
+### Install Mozjpeg
+FROM node:12.13.0-alpine as builder
 
-COPY --from=watchdog /fwatchdog /usr/bin/fwatchdog
-RUN chmod +x /usr/bin/fwatchdog
-
-RUN apk --no-cache add curl ca-certificates \
- 	&& addgroup -S app && adduser -S -g app app
-
-# Install image-processing dependencies
-RUN echo "Installing image-processing dependencies" && \
-    apk --update --no-cache add \
-        build-base \
-        libpng-dev \
-        autoconf \
-        automake \
-        libtool \
-        pkgconf \
-        nasm \
-        tar
-
-# To make user executables available from any place
-ENV PATH="/usr/local/bin:${PATH}"
-
-# Install mozjpeg if imagemin is used
 ARG tag=v3.3.1
+
+RUN apk --update --no-cache add \
+    build-base \
+    autoconf \
+    automake \
+    libtool \
+    pkgconf \
+    nasm \
+    tar
+
 WORKDIR /src/mozjpeg
 ADD https://github.com/mozilla/mozjpeg/archive/$tag.tar.gz ./
 
-RUN tar -xzf $tag.tar.gz && \
-    rm $tag.tar.gz && \
-    SRC_DIR=$(ls -t1 -d mozjpeg-* | head -n1) && \
+RUN tar -xzf $tag.tar.gz
+RUN rm $tag.tar.gz
+
+RUN SRC_DIR=$(ls -t1 -d mozjpeg-* | head -n1) && \
     cd $SRC_DIR && \
     autoreconf -fiv && \
     cd .. && \
-    sh $SRC_DIR/configure --enable-static --disable-shared --disable-dependency-tracking --with-jpeg8 && \
+    sh $SRC_DIR/configure && \
     make install \
          prefix=/usr/local \
          libdir=/usr/local/lib64
 
-# To make user executables available from any place
-ENV PATH="/usr/local/bin:${PATH}"
+
+### Starts the real image that runs the functions
+FROM openfaas/of-watchdog:0.7.7 as watchdog
+FROM node:12.13.0-alpine as ship
+
+COPY --from=watchdog /fwatchdog /usr/bin/fwatchdog
+COPY --from=builder /usr/local /usr/local
+
+RUN chmod +x /usr/bin/fwatchdog
+RUN chmod 777 -R /usr/local
+
+RUN apk --no-cache add curl ca-certificates \
+ 	&& addgroup -S app && adduser -S -g app app
 
 WORKDIR /root/
 
@@ -50,6 +50,9 @@ RUN mkdir -p /home/app
 
 # Wrapper/boot-strapper
 WORKDIR /home/app
+
+RUN echo "Testing that cjpeg is working" && \
+    cjpeg -version
 
 COPY package.json ./
 
@@ -79,35 +82,26 @@ RUN npm i || :
 # COPY function files and folders
 COPY function/ ./
 
-# Run any tests that may be available
-#RUN npm test
 
 # Set correct permissions to use non root user
 WORKDIR /home/app/
 
-# chmod for tmp is for a buildkit issue (@alexellis)
-RUN chmod +rx -R ./function \
-		&& chown app:app -R /home/app \
-   	&& chmod -R 777 /tmp \
-		&& chown app:app -R /tmp \
-		&& chmod +rx -R /usr/local \
-		&& chown app:app -R /usr/local \
-		&& chmod +rx -R /usr/local/bin \
-   	&& chown app:app -R /usr/local/bin
-
-USER app
-
 # Compile the whole project
 RUN ./node_modules/typescript/bin/tsc --project .
+
+# chmod for tmp is for a buildkit issue (@alexellis)
+RUN chown app:app -R /home/app \
+	  && chmod -R 777 /tmp
+
 
 WORKDIR /home/app/function
 # Run any tests that may be available
 RUN npm test
 
-RUN echo "Testing that cjpeg is working" && \
-    cjpeg -version
 
 WORKDIR /home/app/
+
+USER app
 
 ENV cgi_headers="true"
 ENV fprocess="node index.js"
