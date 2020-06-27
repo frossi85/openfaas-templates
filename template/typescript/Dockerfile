@@ -36,10 +36,11 @@ COPY --from=watchdog /fwatchdog /usr/bin/fwatchdog
 COPY --from=builder /usr/local /usr/local
 
 RUN chmod +x /usr/bin/fwatchdog
-RUN chmod 777 -R /usr/local
 
 RUN apk --no-cache add curl ca-certificates \
  	&& addgroup -S app && adduser -S -g app app
+
+RUN chmod -R 777 /usr/local
 
 WORKDIR /root/
 
