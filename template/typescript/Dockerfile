@@ -1,46 +1,12 @@
-### Install Mozjpeg
-FROM node:12.13.0-alpine as builder
-
-ARG tag=v3.3.1
-
-RUN apk --update --no-cache add \
-    build-base \
-    autoconf \
-    automake \
-    libtool \
-    pkgconf \
-    nasm \
-    tar
-
-WORKDIR /src/mozjpeg
-ADD https://github.com/mozilla/mozjpeg/archive/$tag.tar.gz ./
-
-RUN tar -xzf $tag.tar.gz
-RUN rm $tag.tar.gz
-
-RUN SRC_DIR=$(ls -t1 -d mozjpeg-* | head -n1) && \
-    cd $SRC_DIR && \
-    autoreconf -fiv && \
-    cd .. && \
-    sh $SRC_DIR/configure && \
-    make install \
-         prefix=/usr/local \
-         libdir=/usr/local/lib64
-
-
-### Starts the real image that runs the functions
 FROM openfaas/of-watchdog:0.7.7 as watchdog
 FROM node:12.13.0-alpine as ship
 
 COPY --from=watchdog /fwatchdog /usr/bin/fwatchdog
-COPY --from=builder /usr/local /usr/local
 
 RUN chmod +x /usr/bin/fwatchdog
 
 RUN apk --no-cache add curl ca-certificates \
  	&& addgroup -S app && adduser -S -g app app
-
-RUN chmod -R 777 /usr/local
 
 WORKDIR /root/
 
@@ -51,9 +17,6 @@ RUN mkdir -p /home/app
 
 # Wrapper/boot-strapper
 WORKDIR /home/app
-
-RUN echo "Testing that cjpeg is working" && \
-    cjpeg -version
 
 COPY package.json ./
 
