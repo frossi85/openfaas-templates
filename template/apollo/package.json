@@ -12,6 +12,7 @@
   "license": "MIT",
   "dependencies": {
     "@inverti-facil/core": "^0.2.1",
+    "apollo-datasource-rest": "^0.9.3",
     "apollo-server": "^2.15.1",
     "graphql": "^15.2.0"
   },
