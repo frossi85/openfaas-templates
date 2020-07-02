@@ -1,6 +1,6 @@
 import InvertiFacilDataSource from './InvertiFacilDataSource'
 
-class PortfolioApi extends InvertiFacilDataSource {
+export default class PortfolioApi extends InvertiFacilDataSource {
   async getStatistics() {
     return this.post('get-portfolio-statistics')
   }

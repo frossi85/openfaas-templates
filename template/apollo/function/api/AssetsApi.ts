@@ -1,6 +1,6 @@
 import InvertiFacilDataSource from './InvertiFacilDataSource'
 
-class AssetsApi extends InvertiFacilDataSource {
+export default class AssetsApi extends InvertiFacilDataSource {
   async search(term, type) {
     return this.post('search-assets', {term, type})
   }
