@@ -21,7 +21,11 @@ const resolvers = {
         },
     },
     Query: {
-        assets: (parent, { term, type }, { dataSources }) => __awaiter(this, void 0, void 0, function* () { return dataSources.assetsApi.search(term, type); }),
+        assets: (parent, { search, type }, { dataSources }) => __awaiter(this, void 0, void 0, function* () {
+            const a = yield dataSources.assetsApi.search(search, type);
+            console.log("@@@ assets", typeof a);
+            return [...a];
+        }),
         quoteHistory: (parent, { symbol, type, range }, { dataSources }) => __awaiter(this, void 0, void 0, function* () { return dataSources.assetsApi.getQuoteHistory(type, symbol, range); }),
         portfolioStatistics: (parent, args, { dataSources }) => __awaiter(this, void 0, void 0, function* () { return dataSources.portfolioApi.getStatistics(); })
     },

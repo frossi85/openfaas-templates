@@ -58,7 +58,10 @@ class FunctionContext {
 
     headers(value?) {
         if(!value) {
-            return this.headerValues;
+            return {
+                'Content-Type': 'application/json',
+                ...this.headerValues
+            };
         }
 
         this.headerValues = value;

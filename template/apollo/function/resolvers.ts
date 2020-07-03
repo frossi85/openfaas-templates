@@ -16,11 +16,11 @@ const resolvers = {
         },
     },
     Query: {
-        assets: async (parent, {term, type}, { dataSources }) =>
-          dataSources.assetsApi.search(term, type),
-        quoteHistory: async (parent, {symbol, type, range}, { dataSources }) =>
+        assets: (parent, {search, type}, { dataSources }) =>
+          dataSources.assetsApi.search(search, type),
+        quoteHistory: (parent, {symbol, type, range}, { dataSources }) =>
           dataSources.assetsApi.getQuoteHistory(type, symbol, range),
-        portfolioStatistics: async (parent, args, { dataSources }) =>
+        portfolioStatistics: (parent, args, { dataSources }) =>
           dataSources.portfolioApi.getStatistics()
     },
     Mutation: {

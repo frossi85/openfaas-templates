@@ -117,7 +117,7 @@ const typeDefs = apollo_server_express_1.gql `
     # clients can execute, along with the return type for each. In this
     # case, the "books" query returns an array of zero or more Books (defined above).
     type Query {
-        assets(term: String!, type: AssetType): [Asset]
+        assets(search: String!, type: AssetType): [Asset]
         quoteHistory(type: AssetType, symbol: String, range: QuoteRange): AssetQuoteHistory
         portfolioStatistics: PortfolioStatistics
     }
