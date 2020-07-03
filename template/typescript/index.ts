@@ -58,14 +58,11 @@ class FunctionContext {
 
     headers(value?) {
         if(!value) {
-            return {
-                'Content-Type': 'application/json',
-                ...this.headerValues
-            };
+            return this.headerValues
         }
 
-        this.headerValues = value;
-        return this;
+        this.headerValues = value
+        return this
     }
 
     succeed(value) {
@@ -89,11 +86,7 @@ var middleware = async (req, res) => {
             return res.status(500).send(err.toString ? err.toString() : err);
         }
 
-        if(isArray(functionResult) || isObject(functionResult)) {
-            res.set(fnContext.headers()).status(fnContext.status()).send(JSON.stringify(functionResult));
-        } else {
-            res.set(fnContext.headers()).status(fnContext.status()).send(functionResult);
-        }
+        res.set(fnContext.headers()).status(fnContext.status()).json(functionResult)
     };
 
     let fnEvent = new FunctionEvent(req);

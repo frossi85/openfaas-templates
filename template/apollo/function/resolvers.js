@@ -8,7 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const resolvers = {
+exports.default = {
     AssetMetadata: {
         __resolveType(obj, context, info) {
             if (obj.other) {
@@ -21,17 +21,12 @@ const resolvers = {
         },
     },
     Query: {
-        assets: (parent, { search, type }, { dataSources }) => __awaiter(this, void 0, void 0, function* () {
-            const a = yield dataSources.assetsApi.search(search, type);
-            console.log("@@@ assets", typeof a);
-            return [...a];
-        }),
-        quoteHistory: (parent, { symbol, type, range }, { dataSources }) => __awaiter(this, void 0, void 0, function* () { return dataSources.assetsApi.getQuoteHistory(type, symbol, range); }),
-        portfolioStatistics: (parent, args, { dataSources }) => __awaiter(this, void 0, void 0, function* () { return dataSources.portfolioApi.getStatistics(); })
+        assets: (parent, { search, type }, { dataSources }) => dataSources.assetsApi.search(search, type).then(x => JSON.parse(x)),
+        quoteHistory: (parent, { symbol, type, range }, { dataSources }) => dataSources.assetsApi.getQuoteHistory(type, symbol, range).then(x => JSON.parse(x)),
+        portfolioStatistics: (parent, args, { dataSources }) => dataSources.portfolioApi.getStatistics().then(x => JSON.parse(x))
     },
     Mutation: {
-        buyAsset: (_, { assetId, price, quantity }, { dataSources }) => __awaiter(this, void 0, void 0, function* () { return dataSources.portfolioApi.buyAsset(assetId, price, quantity); }),
-        sellAsset: (_, { assetId, price, quantity }, { dataSources }) => __awaiter(this, void 0, void 0, function* () { return dataSources.portfolioApi.buyAsset(assetId, price, quantity); })
+        buyAsset: (_, { assetId, price, quantity }, { dataSources }) => __awaiter(this, void 0, void 0, function* () { return dataSources.portfolioApi.buyAsset(assetId, price, quantity).then(x => JSON.parse(x)); }),
+        sellAsset: (_, { assetId, price, quantity }, { dataSources }) => __awaiter(this, void 0, void 0, function* () { return dataSources.portfolioApi.buyAsset(assetId, price, quantity).then(x => JSON.parse(x)); })
     }
 };
-exports.default = resolvers;

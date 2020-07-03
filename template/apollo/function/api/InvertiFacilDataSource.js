@@ -9,6 +9,7 @@ class InvertiFacilDataSource extends apollo_datasource_rest_1.RESTDataSource {
     }
     willSendRequest(request) {
         const headersToTransfer = ['Authorization', 'x-admin-api-key', 'x-with-user-id', 'x-backend-api-key'];
+        request.headers.set('Content-Type', 'application/json');
         lodash_1.toPairs(this.context.headers)
             .filter(([key]) => headersToTransfer.includes(key))
             .map(([key, value]) => request.headers.set(key, value));
