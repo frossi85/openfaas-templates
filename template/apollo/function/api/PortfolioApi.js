@@ -18,14 +18,14 @@ class PortfolioApi extends InvertiFacilDataSource_1.default {
             return this.post('get-portfolio-statistics');
         });
     }
-    buyAsset(assetId, price, quantity) {
+    buyAsset(assetId, advertisedPrice, quantity) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.post('buy-asset', { assetId, price, quantity });
+            return this.post('buy-asset', { assetId, advertisedPrice, quantity });
         });
     }
-    sellAsset(assetId, price, quantity) {
+    sellAsset(assetId, advertisedPrice, quantity) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.post('sell-asset', { assetId, price, quantity });
+            return this.post('sell-asset', { assetId, advertisedPrice, quantity });
         });
     }
 }

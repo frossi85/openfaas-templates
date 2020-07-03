@@ -113,6 +113,21 @@ const typeDefs = apollo_server_express_1.gql `
         percentage: Float
     }
 
+    type AssetExchangeResult {
+        assetId: String
+        currency: String,
+        advertisedPrice: Float
+        exchangedPrice: Float
+        quantity: Int
+        currentAssetBelongings: AssetBelongings
+    }
+    
+    type AssetBelongings {
+        userId: String
+        assetId: String
+        quantity: Int
+    }
+
     # The "Query" type is special: it lists all of the available queries that
     # clients can execute, along with the return type for each. In this
     # case, the "books" query returns an array of zero or more Books (defined above).
@@ -123,8 +138,8 @@ const typeDefs = apollo_server_express_1.gql `
     }
 
     type Mutation {
-        buyAsset(assetId: String, price: Float, quantity: Int): Asset
-        sellAsset(assetId: String, price: Float, quantity: Int): Asset
+        buyAsset(assetId: String, advertisedPrice: Float, quantity: Int): AssetExchangeResult
+        sellAsset(assetId: String, advertisedPrice: Float, quantity: Int): AssetExchangeResult
     }
 `;
 exports.default = typeDefs;

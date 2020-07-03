@@ -22,9 +22,9 @@ export default {
       dataSources.portfolioApi.getStatistics().then(x => JSON.parse(x))
   },
   Mutation: {
-    buyAsset: async (_, {assetId, price, quantity}, {dataSources}) =>
-      dataSources.portfolioApi.buyAsset(assetId, price, quantity).then(x => JSON.parse(x)),
-    sellAsset: async (_, {assetId, price, quantity}, {dataSources}) =>
-      dataSources.portfolioApi.buyAsset(assetId, price, quantity).then(x => JSON.parse(x))
+    buyAsset: async (_, {assetId, advertisedPrice, quantity}, {dataSources}) =>
+      dataSources.portfolioApi.buyAsset(assetId, advertisedPrice, quantity).then(x => JSON.parse(x)),
+    sellAsset: async (_, {assetId, advertisedPrice, quantity}, {dataSources}) =>
+      dataSources.portfolioApi.sellAsset(assetId, advertisedPrice, quantity).then(x => JSON.parse(x))
   }
 }

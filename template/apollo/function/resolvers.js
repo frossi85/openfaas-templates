@@ -26,7 +26,7 @@ exports.default = {
         portfolioStatistics: (parent, args, { dataSources }) => dataSources.portfolioApi.getStatistics().then(x => JSON.parse(x))
     },
     Mutation: {
-        buyAsset: (_, { assetId, price, quantity }, { dataSources }) => __awaiter(this, void 0, void 0, function* () { return dataSources.portfolioApi.buyAsset(assetId, price, quantity).then(x => JSON.parse(x)); }),
-        sellAsset: (_, { assetId, price, quantity }, { dataSources }) => __awaiter(this, void 0, void 0, function* () { return dataSources.portfolioApi.buyAsset(assetId, price, quantity).then(x => JSON.parse(x)); })
+        buyAsset: (_, { assetId, advertisedPrice, quantity }, { dataSources }) => __awaiter(this, void 0, void 0, function* () { return dataSources.portfolioApi.buyAsset(assetId, advertisedPrice, quantity).then(x => JSON.parse(x)); }),
+        sellAsset: (_, { assetId, advertisedPrice, quantity }, { dataSources }) => __awaiter(this, void 0, void 0, function* () { return dataSources.portfolioApi.sellAsset(assetId, advertisedPrice, quantity).then(x => JSON.parse(x)); })
     }
 };
