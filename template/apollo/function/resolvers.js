@@ -8,6 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+require("apollo-cache-control");
 exports.default = {
     AssetMetadata: {
         __resolveType(obj, context, info) {
@@ -21,9 +22,20 @@ exports.default = {
         },
     },
     Query: {
-        assets: (parent, { search, type }, { dataSources }) => dataSources.assetsApi.search(search, type).then(x => JSON.parse(x)),
-        quoteHistory: (parent, { symbol, type, range }, { dataSources }) => dataSources.assetsApi.getQuoteHistory(type, symbol, range).then(x => JSON.parse(x)),
-        portfolioStatistics: (parent, args, { dataSources }) => dataSources.portfolioApi.getStatistics().then(x => JSON.parse(x))
+        assets: (parent, { search, type }, { dataSources }, info) => __awaiter(this, void 0, void 0, function* () {
+            info.cacheControl.setCacheHint({ maxAge: 30 * 60 });
+            const a = yield dataSources.assetsApi.search(search, type).then(x => JSON.parse(x));
+            console.log(a);
+            return dataSources.assetsApi.search(search, type).then(x => JSON.parse(x));
+        }),
+        quoteHistory: (parent, { symbol, type, range }, { dataSources }, info) => {
+            info.cacheControl.setCacheHint({ maxAge: 60 });
+            return dataSources.assetsApi.getQuoteHistory(type, symbol, range).then(x => JSON.parse(x));
+        },
+        portfolioStatistics: (parent, args, { dataSources }, info) => {
+            info.cacheControl.setCacheHint({ maxAge: 60 });
+            return dataSources.portfolioApi.getStatistics().then(x => JSON.parse(x));
+        }
     },
     Mutation: {
         buyAsset: (_, { assetId, advertisedPrice, quantity }, { dataSources }) => __awaiter(this, void 0, void 0, function* () { return dataSources.portfolioApi.buyAsset(assetId, advertisedPrice, quantity).then(x => JSON.parse(x)); }),
