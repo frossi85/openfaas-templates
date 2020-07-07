@@ -9,12 +9,9 @@ const server = new ApolloServer({
   typeDefs,
   resolvers,
   dataSources: () => dataSources,
-  context: ({req}) => {
-    console.log('@@@@ Apollo request: ', req)
-    return ({
-      headers: req.headers
-    })
-  },
+  context: ({req}) => ({
+    headers: req.headers
+  }),
   plugins: [responseCachePlugin()],
   ...additionalServerConfiguration
 })
