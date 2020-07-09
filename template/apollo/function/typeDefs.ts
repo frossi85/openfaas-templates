@@ -18,7 +18,7 @@ const typeDefs = gql`
         Option
         TreasuryBills
         FixedIncomeSecurities
-        Mocked
+        Unknown
     }
 
     enum QuoteRange {
