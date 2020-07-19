@@ -20,6 +20,10 @@ export default {
       info.cacheControl.setCacheHint({ maxAge: 30 * 60 })
       return dataSources.assetsApi.search(search, type).then(x => JSON.parse(x))
     },
+    quote: (parent, {symbol, type}, {dataSources}, info) => {
+      info.cacheControl.setCacheHint({ maxAge: 60 })
+      return dataSources.assetsApi.getQuote(type, symbol).then(x => JSON.parse(x))
+    },
     quoteHistory: (parent, {symbol, type, range}, {dataSources}, info) => {
       info.cacheControl.setCacheHint({ maxAge: 60 })
       return dataSources.assetsApi.getQuoteHistory(type, symbol, range).then(x => JSON.parse(x))
@@ -27,12 +31,18 @@ export default {
     portfolioStatistics: (parent, args, {dataSources}, info) => {
       info.cacheControl.setCacheHint({maxAge: 60 })
       return dataSources.portfolioApi.getStatistics().then(x => JSON.parse(x))
+    },
+    getCurrencyPrices: (parent, {market}, {dataSources}, info) => {
+      info.cacheControl.setCacheHint({maxAge: 60 })
+      return dataSources.currencyApi.getPrices(market).then(x => JSON.parse(x))
     }
   },
   Mutation: {
     buyAsset: async (_, {assetId, advertisedPrice, quantity}, {dataSources}) =>
       dataSources.portfolioApi.buyAsset(assetId, advertisedPrice, quantity).then(x => JSON.parse(x)),
     sellAsset: async (_, {assetId, advertisedPrice, quantity}, {dataSources}) =>
-      dataSources.portfolioApi.sellAsset(assetId, advertisedPrice, quantity).then(x => JSON.parse(x))
+      dataSources.portfolioApi.sellAsset(assetId, advertisedPrice, quantity).then(x => JSON.parse(x)),
+    exchangeCurrency: async (_, {operation, market, from, to, amount}, {dataSources}) =>
+      dataSources.currencyApi.exchangeCurrency(operation, market, from, to, amount).then(x => JSON.parse(x))
   }
 }

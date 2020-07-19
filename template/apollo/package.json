@@ -11,8 +11,8 @@
   "author": "OpenFaaS Ltd",
   "license": "MIT",
   "dependencies": {
-    "apollo-server": "2.15.1",
-    "apollo-server-plugin-response-cache": "0.5.3"
+    "apollo-server": "^2.16.0",
+    "apollo-server-plugin-response-cache": "^0.5.3"
   },
   "devDependencies": {
     "chai": "^4.2.0",

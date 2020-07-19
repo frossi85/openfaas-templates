@@ -5,7 +5,10 @@ export default class InvertiFacilDataSource extends RESTDataSource {
   baseURL = 'https://frossi85.invertifacil.com.ar'
 
   willSendRequest(request) {
-    const headersToTransfer = ['Authorization', 'x-admin-api-key', 'x-with-user-id', 'x-backend-api-key']
+    const headersToTransfer = [
+      'Authorization', 'authorization', 'x-hasura-role', 'x-hasura-user-id', 'x-admin-api-key', 'x-with-user-id',
+      'x-backend-api-key', 'x-request-id'
+    ]
 
     request.headers.set('Content-Type', 'application/json')
 

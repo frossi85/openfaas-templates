@@ -8,7 +8,7 @@ import {gql} from 'apollo-server'
 // your data.
 const typeDefs = gql`
     # Comments in GraphQL strings (such as this one) start with the hash (#) symbol.
-    enum AssetType {
+    enum IAssetType {
         Stock
         Future
         Bond
@@ -44,15 +44,37 @@ const typeDefs = gql`
 
     union AssetMetadata = CompanyMetadata | AnotherMetadata
 
-    type Asset {
+    type IAsset {
         friendlyName: String
         description: String
         market: String
         symbol: String
         currency: String
-        type: AssetType
+        type: IAssetType
         logo: String
         metadata: AssetMetadata
+    }
+
+    type IAssetQuote {
+        market: String
+        symbol: String
+        currency: String
+        price: Float
+        open: Float
+        close: Float
+        high: Float
+        down: Float
+        volume: Float
+        averageVolume: Float
+        marketCap: Float
+        fiftyTwoWeeksHigh: Float
+        fiftyTwoWeeksLow: Float
+        peRatio: Float
+        bid: Float
+        ask: Float
+        openInterest: Float
+        indexValue: Float
+        settlement: Float
     }
 
     type AssetVariation {
@@ -69,7 +91,7 @@ const typeDefs = gql`
         timestamp: Int
     }
 
-    type AssetQuoteHistory {
+    type IAssetQuoteHistory {
         market: String
         symbol: String
         currency: String
@@ -132,19 +154,60 @@ const typeDefs = gql`
         assetId: String
         quantity: Int
     }
+    
+    type CurrencyQuote {
+        from: Currency
+        to: Currency
+        buyPrice: Float
+        sellPrice: Float
+        market: CurrencyMarket
+    }
+    
+    type CurrencyExchangeResult {
+        id: Int,
+        userId: String,
+        market: CurrencyMarket,
+        from: Currency
+        to: Currency,
+        operation: TradeOperation
+        amount: Float
+        price: Float
+    }
+    
+    enum CurrencyMarket {
+        Official,
+        Blue,
+        Soy,
+        Liqui,
+        Bag,
+        Ours
+    }
+    
+    enum Currency {
+        USD,
+        ARS
+    }
+    
+    enum TradeOperation {
+        Sell,
+        Buy,
+    }
 
     # The "Query" type is special: it lists all of the available queries that
     # clients can execute, along with the return type for each. In this
     # case, the "books" query returns an array of zero or more Books (defined above).
     type Query {
-        assets(search: String!, type: AssetType): [Asset]
-        quoteHistory(type: AssetType, symbol: String, range: QuoteRange): AssetQuoteHistory
+        assets(search: String!, type: IAssetType): [IAsset]
+        quote(type: IAssetType!, symbol: String!): IAssetQuote
+        quoteHistory(type: IAssetType, symbol: String, range: QuoteRange): IAssetQuoteHistory
         portfolioStatistics: PortfolioStatistics
+        getCurrencyPrices(market: CurrencyMarket): [CurrencyQuote]
     }
 
     type Mutation {
         buyAsset(assetId: String, advertisedPrice: Float, quantity: Int): AssetExchangeResult
         sellAsset(assetId: String, advertisedPrice: Float, quantity: Int): AssetExchangeResult
+        exchangeCurrency(operation: TradeOperation!, market: CurrencyMarket!, from: Currency!, to: Currency!, amount: Float!): CurrencyExchangeResult
     }
 `
 
