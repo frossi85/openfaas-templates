@@ -127,12 +127,7 @@ const typeDefs = gql`
 
     type HistoryPoint {
         timestamp: Int
-        value: AbsoluteAndPercentage
-    }
-
-    type AbsoluteAndPercentage {
-        absolute: Float
-        percentage: Float
+        value: Float
     }
 
     type AssetAllocation {
